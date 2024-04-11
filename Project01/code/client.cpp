@@ -228,14 +228,19 @@ int tcpsocket()
         	perror("Invalid address/ Address not supported");
         	exit(EXIT_FAILURE);
     	}
+        cout << "No problem currently" << endl;
+        cout << "server_fd" << server_fd << endl;
+        cout << "sizeof(serv_addr)" << sizeof(serv_addr) << endl;
+        
 
     	// Connected to server
     	if (connect(server_fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) { //(socket, ip and port , length)
         	perror("Connection Failed");
         	exit(EXIT_FAILURE);
     	}
-    	
+    cout << "outside" << endl;
    	while(count<10){
+        cout << "sending" << count << endl;
    	tcp_msg_sender(server_fd, (struct sockaddr*)&serv_addr);
    	count++;
    	sleep(1);
@@ -277,8 +282,7 @@ int udpsocket()
 
 
 int main(){
-	
 	tcpsocket();	
-	udpsocket();	
+	// udpsocket();	
 	return 0;
 }

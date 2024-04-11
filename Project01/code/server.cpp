@@ -145,6 +145,7 @@ int tcpsocket(){
 	cout << "start tcp" << endl;
     int count=0;
     while(count<10){ 
+        cout << "count:" << count << endl;
     int server_fd, new_socket;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
@@ -237,7 +238,7 @@ int main()
     cout << "hello" << endl;
     tcpsocket();
     sleep(1);
-	udpsocket();
+	// udpsocket();
 	
 	return 0;
 }
