@@ -156,7 +156,8 @@ void tcp_msg_sender(int fd, struct sockaddr* dst){
     tcpHeader.urgent_pointer = htons(urgent_pointer);
     
     // 將 MAC header 、IP header 和 TCP header複製到buffer
-    buffer[PACKET_SIZE] = {0};
+    // buffer[PACKET_SIZE] = {0};
+    fill(buffer, buffer + PACKET_SIZE, 0);
     memcpy(buffer, &macHeader, sizeof(MACHeader));
     memcpy(buffer + sizeof(MACHeader), &ipHeader, sizeof(IPHeader));
     memcpy(buffer + sizeof(MACHeader) + sizeof(IPHeader), &tcpHeader, sizeof(TCPHeader));
@@ -174,9 +175,8 @@ void rcv_UDPpacket(int fd){
 	struct MACHeader *machdr = (struct MACHeader *)malloc(sizeof(struct MACHeader));
 	struct Packet *packet = (struct Packet *)malloc(sizeof(struct Packet));
 	socklen_t len;
-
 	struct sockaddr_in clent_addr;
-	
+	int count=0;
 	char buf[BUFF_LEN];
         int cnt = 0;
 	while(cnt<10)
@@ -209,7 +209,7 @@ void rcv_UDPpacket(int fd){
 
 int tcpsocket()
 {
-        
+        cout << "start tcp" << endl;
       	int count=0;
     	int server_fd;
     	struct sockaddr_in serv_addr;
@@ -246,6 +246,8 @@ int tcpsocket()
 
 int udpsocket()
 {
+    cout << "start udp" << endl;
+
 	int cli_sockfd;
 	struct sockaddr_in cli_addr;
 	cli_sockfd = socket(AF_INET, SOCK_DGRAM, 0);

@@ -142,7 +142,7 @@ void udp_msg_sender(int fd, struct sockaddr* dst)
 }
 
 int tcpsocket(){
-	
+	cout << "start tcp" << endl;
     int count=0;
     while(count<10){ 
     int server_fd, new_socket;
@@ -154,7 +154,11 @@ int tcpsocket(){
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
         perror("Socket creation error");
         exit(EXIT_FAILURE);
+    }    
+    else{
+        cout << "tcp created" << endl;
     }
+    
 
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -200,6 +204,8 @@ int tcpsocket(){
 
 int udpsocket()
 {
+	cout << "start udp" << endl;
+
     int server_fd;
     struct sockaddr_in ser_addr;
 
@@ -208,6 +214,9 @@ int udpsocket()
     {
         printf("create socket fail!\n");
         return -1;
+    }
+    else{
+        cout << "udp created" << endl;
     }
 
 
@@ -225,8 +234,9 @@ int udpsocket()
 
 int main()
 {
-        tcpsocket();
-        sleep(1);
+    cout << "hello" << endl;
+    tcpsocket();
+    sleep(1);
 	udpsocket();
 	
 	return 0;
