@@ -34,17 +34,16 @@ void handleTraffic(int recvSockfd, struct sockaddr_in recvAddr, int sendSockfd, 
     }
 }
 
+
 int main() {
+    int tcp_receive;
+    struct sockaddr_in addr_tcp_receive;
+    struct sockaddr_in client_addr;
+    socklen_t addrlen;
 
-    int tcp_receive, tcp_send;
-    // struct sockaddr_in addrClientToServer, addrServerToClient, addrServer, addrClient;
-    struct sockaddr_in addr_tcp_receive, addr_tcp_send;
-
-    // Create sockets for the router
-    tcp_receive = socket(AF_INET, SOCK_DGRAM, 0);
-    tcp_send = socket(AF_INET, SOCK_DGRAM, 0);
-
-    if (tcp_receive < 0 || tcp_send < 0) {
+    // Create a UDP socket for the router
+    tcp_receive = socket(AF_INET, SOCK_STREAM, 0);
+    if (tcp_receive < 0) {
         perror("Socket creation failed");
         return 1;
     }
@@ -54,14 +53,66 @@ int main() {
     addr_tcp_receive.sin_family = AF_INET;
     addr_tcp_receive.sin_addr.s_addr = htonl(INADDR_ANY);
     addr_tcp_receive.sin_port = htons(TCP_FROM_CLIENT);
+    inet_aton(CLIENT_IP, &addr_tcp_receive.sin_addr);
 
     if (bind(tcp_receive, (struct sockaddr *)&addr_tcp_receive, sizeof(addr_tcp_receive)) < 0) {
         perror("Bind failed for client to server socket");
         return 1;
     }
-    // cout << addr_tcp_receive << endl;
+    printf("server start at: %s:%d\n", inet_ntoa(addr_tcp_receive.sin_addr), TCP_FROM_CLIENT);
+    int status;
 
-    
+    status = listen(tcp_receive, 5);
+    if (status == -1) {
+        perror("Listening error");
+        exit(1);
+    }
+    char buffer[BUFFER_SIZE];
+    int n;
+
+    // while ((n = recv(tcp_receive, buffer, BUFFER_SIZE, 0)) > 0) {
+    //     cout << "Received packet of size " << n << " bytes." << endl;
+    //     buffer[n] = '\0';  // Ensure the buffer is null-terminated
+    //     cout << "Buffer: " << buffer << endl;
+    // }
+    int new_fd;
+    char indata[1024] = {0}, outdata[1024] = {0};
+
+    while (1) {
+        new_fd = accept(tcp_receive, (struct sockaddr *)&client_addr, &addrlen);
+        printf("connected by %s:%d\n", inet_ntoa(client_addr.sin_addr),
+            ntohs(client_addr.sin_port));
+
+        while (1) {
+            int nbytes = recv(new_fd, indata, sizeof(indata), 0);
+            if (nbytes <= 0) {
+                close(new_fd);
+                printf("client closed connection.\n");
+                break;
+            }
+            printf("recv: %s\n", indata);
+
+            sprintf(outdata, "echo %s", indata);
+            send(new_fd, outdata, strlen(outdata), 0);
+        }
+    }
+
+    if (n < 0) {
+        perror("Recv failed");
+    }
+
+    cout << "Ending reception." << endl;
+    close(tcp_receive);
+    return 0;
+}
+
+
+    // tcp_send = socket(AF_INET, SOCK_DGRAM, 0);
+    // if (tcp_send < 0) {
+    //     perror("Socket creation failed");
+    //     return 1;
+    // }
+
     // // Set up the server to client forwarding
     // memset(&addr_tcp_send, 0, sizeof(addr_tcp_send));
     // addr_tcp_send.sin_family = AF_INET;
@@ -84,7 +135,7 @@ int main() {
     // addrClient.sin_port = htons(CLIENT_PORT);
     // inet_pton(AF_INET, CLIENT_IP, &addrClient.sin_addr);
 
-    // // Start a child process or thread to handle Client to Server traffic
+    // Start a child process or thread to handle Client to Server traffic
     // pid_t pid = fork();
     // if (pid == 0) {
     //     // Child process: handle client to server traffic
@@ -101,4 +152,3 @@ int main() {
     //     close(sockfdServerToClient);
     //     return 0;
     // }
-}

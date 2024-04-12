@@ -26,7 +26,7 @@ using namespace std;
 #define CLIENT_IP "127.0.0.1"
 #define SERVER_IP "127.0.0.2"
 // #define SERVER_PORT 9000
-#define ROUTER_PORT_TCP 9005
+#define ROUTER_PORT_TCP 9002
 #define CLIENT_PORT 9003
 
 #define SA struct sockaddr
@@ -115,7 +115,7 @@ void tcp_msg_sender(int fd, struct sockaddr* dst){
     uint8_t protocol = 0x06; // TCP (0x06)
     uint16_t header_checksum = 0x0000;
     //uint32_t options=0x0000;
-    const char*source_ip_str = "10.17.164.10"; // source IP address
+    const char* source_ip_str = "10.17.164.10"; // source IP address
     const char* destination_ip_str ="10.17.89.69";//(rand() % 2 == 0) ? "10.27.79.68" : "10.17.89.69"; 
     
     
@@ -163,8 +163,8 @@ void tcp_msg_sender(int fd, struct sockaddr* dst){
     memcpy(buffer + sizeof(MACHeader), &ipHeader, sizeof(IPHeader));
     memcpy(buffer + sizeof(MACHeader) + sizeof(IPHeader), &tcpHeader, sizeof(TCPHeader));
     memcpy(buffer + sizeof(MACHeader) + sizeof(IPHeader) + sizeof(TCPHeader), payload , payload_length);
-    cout << "Buffer produced" << endl;
-    cout << "fd" << fd << endl;
+    // cout << "Buffer produced" << buffer << endl;
+    // cout << "fd" << fd << endl;
 
     // send to server
     send(fd, buffer, sizeof(buffer) , 0 ); //(socket , buffer ,buffer size,  address length)
