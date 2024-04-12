@@ -19,7 +19,45 @@ int send_port = 9003;
 
 void tcp_recv(){
 
-    
+    int sock_fd, new_fd;
+    socklen_t addrlen;
+    struct sockaddr_in my_addr, client_addr;
+    int status;
+    char indata[1024] = {0}, outdata[1024] = {0};
+    int on = 1;
+
+    // create a socket
+    sock_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock_fd == -1) {
+        perror("Socket creation error");
+        exit(1);
+    }
+
+    // for "Address already in use" error message
+    if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) == -1) {
+        perror("Setsockopt error");
+        exit(1);
+    }
+
+    // server address
+    my_addr.sin_family = AF_INET;
+    inet_aton(host, &my_addr.sin_addr);
+    my_addr.sin_port = htons(port);
+
+    status = bind(sock_fd, (struct sockaddr *)&my_addr, sizeof(my_addr));
+    if (status == -1) {
+        perror("Binding error");
+        exit(1);
+    }
+    printf("server start at: %s:%d\n", inet_ntoa(my_addr.sin_addr), port);
+
+    status = listen(sock_fd, 5);
+    if (status == -1) {
+        perror("Listening error");
+        exit(1);
+    }
+    printf("wait for connection...\n");
+
     addrlen = sizeof(client_addr);
     int count = 0;
     while (1) {
@@ -47,7 +85,28 @@ void tcp_recv(){
 }
 
 void udp_send(){
+    int sock_fd;
+    struct sockaddr_in serv_name;
+    int status;
+    char indata[1024] = {0}, outdata[1024] = {0};
 
+    // create a socket
+    sock_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock_fd == -1) {
+        perror("Socket creation error");
+        exit(1);
+    }
+
+    // server address
+    serv_name.sin_family = AF_INET;
+    inet_aton(send_host, &serv_name.sin_addr);
+    serv_name.sin_port = htons(send_port);
+
+    status = connect(sock_fd, (struct sockaddr *)&serv_name, sizeof(serv_name));
+    if (status == -1) {
+        perror("Connection error");
+        exit(1);
+    }
     outdata[0] = 'a';
     outdata[1] = 'b';
     outdata[2] = 'c';
@@ -84,79 +143,10 @@ void udp_send(){
         // printf("Recv: %s\n", indata);
     }
 }
-
-int sock_fd, new_fd;
-socklen_t addrlen;
-struct sockaddr_in my_addr, client_addr;
-int status;
-int on = 1;
-
-char indata[1024] = {0}, outdata[1024] = {0};
-int udp_sock_fd;
-struct sockaddr_in serv_name;
-int udp_status;
 int main()
 {
-
-
-    // create a socket
-    sock_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock_fd == -1) {
-        perror("Socket creation error");
-        exit(1);
-    }
-
-    // for "Address already in use" error message
-    if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) == -1) {
-        perror("Setsockopt error");
-        exit(1);
-    }
-
-    // server address
-    my_addr.sin_family = AF_INET;
-    inet_aton(host, &my_addr.sin_addr);
-    my_addr.sin_port = htons(port);
-
-    status = bind(sock_fd, (struct sockaddr *)&my_addr, sizeof(my_addr));
-    if (status == -1) {
-        perror("Binding error");
-        exit(1);
-    }
-    printf("server start at: %s:%d\n", inet_ntoa(my_addr.sin_addr), port);
-
-    status = listen(sock_fd, 5);
-    if (status == -1) {
-        perror("Listening error");
-        exit(1);
-    }
-    printf("wait for connection...\n");
-
-
-
-    sleep(3);
-
-
-
-    // create a socket
-    udp_sock_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (udp_sock_fd == -1) {
-        perror("Socket creation error");
-        exit(1);
-    }
-
-    // server address
-    serv_name.sin_family = AF_INET;
-    inet_aton(send_host, &serv_name.sin_addr);
-    serv_name.sin_port = htons(send_port);
-
-    udp_status = connect(udp_sock_fd, (struct sockaddr *)&serv_name, sizeof(serv_name));
-    if (udp_status == -1) {
-        perror("Connection error");
-        exit(1);
-    }
-
-
     tcp_recv();
+    sleep(3);
     udp_send();
     return 0;
 }
