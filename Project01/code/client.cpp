@@ -84,7 +84,7 @@ int count;
 char last_payload[5000] = "`abc"; // 保持上次傳輸的 payload
 
 void tcp_msg_sender(int fd, struct sockaddr* dst){
-
+    cout << "In the tcp sender now" << endl;
     // payload
     char payload[5000]; // 每次都使用新的 payload 來修改
     strcpy(payload, last_payload); // 使用上一次傳輸的 payload
@@ -135,6 +135,7 @@ void tcp_msg_sender(int fd, struct sockaddr* dst){
     ipHeader.protocol = protocol;
     ipHeader.header_checksum = htons(header_checksum);
     //ipHeader.options=htons(options);
+    cout << "Header produced" << endl;
 
     struct TCPHeader tcpHeader;
     uint16_t source_port = 12345; // Source port
@@ -162,10 +163,13 @@ void tcp_msg_sender(int fd, struct sockaddr* dst){
     memcpy(buffer + sizeof(MACHeader), &ipHeader, sizeof(IPHeader));
     memcpy(buffer + sizeof(MACHeader) + sizeof(IPHeader), &tcpHeader, sizeof(TCPHeader));
     memcpy(buffer + sizeof(MACHeader) + sizeof(IPHeader) + sizeof(TCPHeader), payload , payload_length);
+    cout << "Buffer produced" << endl;
+    cout << "fd" << fd << endl;
 
     // send to server
     send(fd, buffer, sizeof(buffer) , 0 ); //(socket , buffer ,buffer size,  address length)
     printf("client send tcp packet\n");
+    cout << "content: " << payload << endl;
 	
 }
 

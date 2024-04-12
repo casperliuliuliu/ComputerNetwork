@@ -144,9 +144,7 @@ void udp_msg_sender(int fd, struct sockaddr* dst)
 int tcpsocket(){
 	cout << "start tcp" << endl;
     int count=0;
-    while(count<10){ 
-        cout << "count:" << count << endl;
-    int server_fd, new_socket;
+        int server_fd, new_socket;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
     char buffer[PACKET_SIZE] = {0};
@@ -170,21 +168,20 @@ int tcpsocket(){
         perror("Bind failed");
         exit(EXIT_FAILURE);
     }
-
     // listen 
     if (listen(server_fd, 3) < 0) {
         perror("Listen failed");
         exit(EXIT_FAILURE);
     }
 
-    // Waiting for connection
+
+    while(count<10){ 
+        cout << "count:" << count << endl;
+        // Waiting for connection
     if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
         perror("Accept failed");
         exit(EXIT_FAILURE);
     }
-
-    
-    
     read(new_socket, buffer, PACKET_SIZE);
     cout<<"-----server receive-----"<<endl; 
     cout<<"payload : ";
@@ -196,8 +193,12 @@ int tcpsocket(){
     cout<<endl<<endl;
     count++;
     close(new_socket);
-    close(server_fd);
+
+
     }
+    close(server_fd);
+    sleep(1);
+    cout<< "end of tcp socket" << endl;
 
   
     return 0;
