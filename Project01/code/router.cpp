@@ -123,7 +123,6 @@
 //         cout << endl;
 
 //     }
-
 //     if (n < 0) {
 //         perror("Error in receiving data");
 //     }
@@ -164,23 +163,23 @@
 //     inet_pton(AF_INET, CLIENT_IP, &clientAddr.sin_addr);
 //     cout << "finish copy client" << endl;
 
-//     // Start a child process to handle traffic from client to server
-//     pid_t pid = fork();
-//     if (pid == 0) { // Child process
-//         cout << "handling c to s" << endl;
-//         handleTraffic(sockfd, clientAddr, serverAddr);
-//         close(sockfd);
-//         return 0;
-//     } else if (pid > 0) { // Parent process
-//         cout << "handling s to c" << endl;
-//         handleTraffic(sockfd, serverAddr, clientAddr);
-//         close(sockfd);
-//         return 0;
-//     } else {
-//         perror("Failed to fork");
-//         close(sockfd);
-//         return 1;
-//     }
+    // Start a child process to handle traffic from client to server
+    // pid_t pid = fork();
+    // if (pid == 0) { // Child process
+    //     cout << "handling c to s" << endl;
+    //     handleTraffic(sockfd, clientAddr, serverAddr);
+    //     close(sockfd);
+    //     return 0;
+    // } else if (pid > 0) { // Parent process
+    //     cout << "handling s to c" << endl;
+    //     handleTraffic(sockfd, serverAddr, clientAddr);
+    //     close(sockfd);
+    //     return 0;
+    // } else {
+    //     perror("Failed to fork");
+    //     close(sockfd);
+    //     return 1;
+    // }
 // }
 
 
@@ -196,214 +195,245 @@
 #define SERVER_PORT 9000
 #define ROUTER_PORT_CLIENT_TO_SERVER 9002
 #define CLIENT_PORT 9003
-#define ROUTER_PORT_SERVER_TO_CLIENT 9002
+#define ROUTER_PORT_SERVER_TO_CLIENT 9004
 #define BUFFER_SIZE 2048
 
 using namespace std;
 
-// void relayTraffic(int clientSockfd, int serverSockfd) {
-//     cout << "relaying traffic" << endl;  
-//     char buffer[BUFFER_SIZE];
-//     ssize_t n;
+// // void relayTraffic(int clientSockfd, int serverSockfd) {
+// //     cout << "relaying traffic" << endl;  
+// //     char buffer[BUFFER_SIZE];
+// //     ssize_t n;
 
-//     // Relay from client to server
-//     while ((n = recv(clientSockfd, buffer, BUFFER_SIZE, 0)) > 0) {
-//         if (send(serverSockfd, buffer, n, 0) < 0) {
-//             perror("Failed to send to server");
-//             break;
-//         }
-//     }
+// //     // Relay from client to server
+// //     while ((n = recv(clientSockfd, buffer, BUFFER_SIZE, 0)) > 0) {
+// //         if (send(serverSockfd, buffer, n, 0) < 0) {
+// //             perror("Failed to send to server");
+// //             break;
+// //         }
+// //     }
 
-//     if (n < 0) {
-//         perror("Error in receiving data from client");
-//     }
+// //     if (n < 0) {
+// //         perror("Error in receiving data from client");
+// //     }
+// // //     close(clientSockfd);
+// // //     close(serverSockfd);
+// //     sleep(1);
+// // }
+
+// // void relayTraffic(int clientSockfd, int serverSockfd) {
+// //     char buffer[BUFFER_SIZE];
+// //     ssize_t n;
+
+// //     fd_set readfds;
+// //     int maxfd;
+
+// //     while (true) {
+// //         cout << "stuck..." << endl;
+// //         FD_ZERO(&readfds);
+// //         FD_SET(clientSockfd, &readfds);
+// //         FD_SET(serverSockfd, &readfds);
+
+// //         maxfd = (clientSockfd > serverSockfd) ? clientSockfd : serverSockfd;
+
+// //         // Wait for data to read on either socket
+// //         if (select(maxfd + 1, &readfds, NULL, NULL, NULL) < 0) {
+// //             perror("Select failed");
+// //             break;
+// //         }
+
+// //         // Relay from client to server
+// //         if (FD_ISSET(clientSockfd, &readfds)) {
+// //             n = recv(clientSockfd, buffer, BUFFER_SIZE, 0);
+// //             if (n <= 0) break;  // Break the loop if the connection is closed or an error occurred
+// //             if (send(serverSockfd, buffer, n, 0) < 0) {
+// //                 perror("Failed to send to server");
+// //                 break;
+// //             }
+// //         }
+
+// //         // Relay from server to client
+// //         if (FD_ISSET(serverSockfd, &readfds)) {
+// //             n = recv(serverSockfd, buffer, BUFFER_SIZE, 0);
+// //             if (n <= 0) break;  // Break the loop if the connection is closed or an error occurred
+// //             if (send(clientSockfd, buffer, n, 0) < 0) {
+// //                 perror("Failed to send to client");
+// //                 break;
+// //             }
+// //         }
+// //     }
+
 // //     close(clientSockfd);
 // //     close(serverSockfd);
-//     sleep(1);
-// }
+
+// // }
+
+// #include <sys/select.h>
+// #include <sys/time.h>  // For struct timeval
 
 // void relayTraffic(int clientSockfd, int serverSockfd) {
 //     char buffer[BUFFER_SIZE];
 //     ssize_t n;
-
 //     fd_set readfds;
-//     int maxfd;
+//     struct timeval tv;  // Timeout struct
 
 //     while (true) {
-//         cout << "stuck..." << endl;
+//         cout << "relaying traffic" << endl;
 //         FD_ZERO(&readfds);
 //         FD_SET(clientSockfd, &readfds);
 //         FD_SET(serverSockfd, &readfds);
 
-//         maxfd = (clientSockfd > serverSockfd) ? clientSockfd : serverSockfd;
+//         tv.tv_sec = 5;  // Timeout after 5 seconds
+//         tv.tv_usec = 0;
 
-//         // Wait for data to read on either socket
-//         if (select(maxfd + 1, &readfds, NULL, NULL, NULL) < 0) {
-//             perror("Select failed");
+//         int maxfd = (clientSockfd > serverSockfd) ? clientSockfd : serverSockfd;
+//         int retval = select(maxfd + 1, &readfds, NULL, NULL, &tv);
+
+//         if (retval == -1) {
+//             perror("Select error");
 //             break;
+//         } else if (retval == 0) {
+//             cout << "Select timeout, no data." << endl;
+//             continue;  // Continue the loop, maybe log this if it happens often
 //         }
 
-//         // Relay from client to server
 //         if (FD_ISSET(clientSockfd, &readfds)) {
 //             n = recv(clientSockfd, buffer, BUFFER_SIZE, 0);
-//             if (n <= 0) break;  // Break the loop if the connection is closed or an error occurred
+//             if (n <= 0) break;
 //             if (send(serverSockfd, buffer, n, 0) < 0) {
 //                 perror("Failed to send to server");
 //                 break;
 //             }
 //         }
 
-//         // Relay from server to client
 //         if (FD_ISSET(serverSockfd, &readfds)) {
 //             n = recv(serverSockfd, buffer, BUFFER_SIZE, 0);
-//             if (n <= 0) break;  // Break the loop if the connection is closed or an error occurred
+//             if (n <= 0) break;
 //             if (send(clientSockfd, buffer, n, 0) < 0) {
 //                 perror("Failed to send to client");
 //                 break;
 //             }
 //         }
+//         cout << "buffer:" << buffer << endl;
 //     }
 
 //     close(clientSockfd);
 //     close(serverSockfd);
-
 // }
 
-#include <sys/select.h>
-#include <sys/time.h>  // For struct timeval
 
-void relayTraffic(int clientSockfd, int serverSockfd) {
-    char buffer[BUFFER_SIZE];
-    ssize_t n;
-    fd_set readfds;
-    struct timeval tv;  // Timeout struct
+// void handleTraffic(int recvSockfd, struct sockaddr_in recvAddr, int sendSockfd, struct sockaddr_in sendAddr) {
+//     char buffer[BUFFER_SIZE];
+//     socklen_t addrLen = sizeof(recvAddr);
+//     int n;
 
-    while (true) {
-        cout << "relaying traffic" << endl;
-        FD_ZERO(&readfds);
-        FD_SET(clientSockfd, &readfds);
-        FD_SET(serverSockfd, &readfds);
+//     while ((n = recvfrom(recvSockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&recvAddr, &addrLen)) > 0) {
+//         cout << "Received packet of size " << n << " bytes: ";
+//         sendto(sendSockfd, buffer, n, 0, (struct sockaddr *)&sendAddr, sizeof(sendAddr));
+//         cout << "Forwarded a packet of size " << n << " bytes" << endl;
+//     }
 
-        tv.tv_sec = 5;  // Timeout after 5 seconds
-        tv.tv_usec = 0;
+//     if (n < 0) {
+//         perror("Error in receiving data");
+//     }
+// }
+// int main() {
+//     int listenSockfd = socket(AF_INET, SOCK_STREAM, 0);
+//     if (listenSockfd < 0) {
+//         perror("Socket creation failed");
+//         return 1;
+//     }
 
-        int maxfd = (clientSockfd > serverSockfd) ? clientSockfd : serverSockfd;
-        int retval = select(maxfd + 1, &readfds, NULL, NULL, &tv);
+//     int enable = 1;
+//     if (setsockopt(listenSockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+//         perror("setsockopt(SO_REUSEADDR) failed");
+//         close(listenSockfd);
+//         return 1;
+//     }
 
-        if (retval == -1) {
-            perror("Select error");
-            break;
-        } else if (retval == 0) {
-            cout << "Select timeout, no data." << endl;
-            continue;  // Continue the loop, maybe log this if it happens often
-        }
+//     struct sockaddr_in listenAddr, serverAddr;
+//     memset(&listenAddr, 0, sizeof(listenAddr));
+//     listenAddr.sin_family = AF_INET;
+//     listenAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+//     listenAddr.sin_port = htons(ROUTER_PORT_CLIENT_TO_SERVER);
 
-        if (FD_ISSET(clientSockfd, &readfds)) {
-            n = recv(clientSockfd, buffer, BUFFER_SIZE, 0);
-            if (n <= 0) break;
-            if (send(serverSockfd, buffer, n, 0) < 0) {
-                perror("Failed to send to server");
-                break;
-            }
-        }
+//     if (bind(listenSockfd, (struct sockaddr *)&listenAddr, sizeof(listenAddr)) < 0) {
+//         perror("Bind failed");
+//         close(listenSockfd);
+//         return 1;
+//     }
 
-        if (FD_ISSET(serverSockfd, &readfds)) {
-            n = recv(serverSockfd, buffer, BUFFER_SIZE, 0);
-            if (n <= 0) break;
-            if (send(clientSockfd, buffer, n, 0) < 0) {
-                perror("Failed to send to client");
-                break;
-            }
-        }
-        cout << "buffer:" << buffer << endl;
-    }
+//     if (listen(listenSockfd, 5) < 0) {
+//         perror("Listen failed");
+//         close(listenSockfd);
+//         return 1;
+//     }
+//     // Configure server address once outside the loop
+//     memset(&serverAddr, 0, sizeof(serverAddr));
+//     serverAddr.sin_family = AF_INET;
+//     serverAddr.sin_port = htons(SERVER_PORT);
+//     inet_pton(AF_INET, SERVER_IP, &serverAddr.sin_addr);
 
-    close(clientSockfd);
-    close(serverSockfd);
-}
+//     while (true) {
 
-void handleTraffic(int recvSockfd, struct sockaddr_in recvAddr, int sendSockfd, struct sockaddr_in sendAddr) {
-    char buffer[BUFFER_SIZE];
-    socklen_t addrLen = sizeof(recvAddr);
-    int n;
+//         cout << "looping in the main..." << endl;
+//         int clientSockfd = accept(listenSockfd, NULL, NULL);
+//         if (clientSockfd < 0) {
+//             perror("Failed to accept connection");
+//             continue;
+//         }
+//         cout << "clientSockfd success" << endl; 
 
-    while ((n = recvfrom(recvSockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr *)&recvAddr, &addrLen)) > 0) {
-        cout << "Received packet of size " << n << " bytes: ";
-        sendto(sendSockfd, buffer, n, 0, (struct sockaddr *)&sendAddr, sizeof(sendAddr));
-        cout << "Forwarded a packet of size " << n << " bytes" << endl;
-    }
 
-    if (n < 0) {
-        perror("Error in receiving data");
-    }
-}
-int main() {
-    int listenSockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (listenSockfd < 0) {
-        perror("Socket creation failed");
-        return 1;
-    }
+//         // fd_set set;
+//         // struct timeval timeout;
+//         // int rv;
 
-    int enable = 1;
-    if (setsockopt(listenSockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
-        perror("setsockopt(SO_REUSEADDR) failed");
-        close(listenSockfd);
-        return 1;
-    }
+//         // FD_ZERO(&set); /* clear the set */
+//         // FD_SET(listenSockfd, &set); /* add our file descriptor to the set */
 
-    struct sockaddr_in listenAddr, serverAddr;
-    memset(&listenAddr, 0, sizeof(listenAddr));
-    listenAddr.sin_family = AF_INET;
-    listenAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    listenAddr.sin_port = htons(ROUTER_PORT_CLIENT_TO_SERVER);
+//         // timeout.tv_sec = 30;
+//         // timeout.tv_usec = 0;
+//         // int clientSockfd;
+//         // rv = select(listenSockfd + 1, &set, NULL, NULL, &timeout);
+//         // if(rv == -1) {
+//         //     perror("select"); /* an error occurred */
+//         // } else if(rv == 0) {
+//         //     printf("timeout occurred (30 seconds) \n"); /* a timeout occurred */
+//         // } else {
+//         //     clientSockfd = accept(listenSockfd, NULL, NULL); /* there was data to read */
+//         //     if (clientSockfd < 0) {
+//         //         perror("Failed to accept connection");
+//         //     } else {
+//         //         // Proceed to handle the client connection
+//         //     }
+//         // }
 
-    if (bind(listenSockfd, (struct sockaddr *)&listenAddr, sizeof(listenAddr)) < 0) {
-        perror("Bind failed");
-        close(listenSockfd);
-        return 1;
-    }
+//         int serverSockfd = socket(AF_INET, SOCK_STREAM, 0);
+//         if (serverSockfd < 0) {
+//             perror("Server socket creation failed");
+//             close(clientSockfd);
+//             continue;
+//         }
+//         cout << "serverSockfd success" << endl; 
 
-    if (listen(listenSockfd, 5) < 0) {
-        perror("Listen failed");
-        close(listenSockfd);
-        return 1;
-    }
-    while (true) {
+//         if (connect(serverSockfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
+//             perror("Connect to server failed");
+//             close(clientSockfd);
+//             close(serverSockfd);
+//             continue;
+//         }
+//         cout << "connect success" << endl; 
 
-    // Configure server address once outside the loop
-    memset(&serverAddr, 0, sizeof(serverAddr));
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SERVER_PORT);
-    inet_pton(AF_INET, SERVER_IP, &serverAddr.sin_addr);
+//         // Relay traffic between the client and server
+//         relayTraffic(clientSockfd, serverSockfd);
+//         // close(clientSockfd);
+//         sleep(1);
+//     }
 
-        cout << "looping in the main..." << endl;
-        int clientSockfd = accept(listenSockfd, NULL, NULL);
-        if (clientSockfd < 0) {
-            perror("Failed to accept connection");
-            continue;
-        }
-
-        int serverSockfd = socket(AF_INET, SOCK_STREAM, 0);
-        if (serverSockfd < 0) {
-            perror("Server socket creation failed");
-            close(clientSockfd);
-            continue;
-        }
-
-        if (connect(serverSockfd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
-            perror("Connect to server failed");
-            close(clientSockfd);
-            close(serverSockfd);
-            continue;
-        }
-
-        // Relay traffic between the client and server
-        relayTraffic(clientSockfd, serverSockfd);
-    }
-
-    close(listenSockfd);
-    return 0;
-}
+//     close(listenSockfd);
+//     return 0;
+// }
 
 // int main() {
 //     int listenSockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -467,69 +497,72 @@ int main() {
 //     close(listenSockfd);
 //     return 0;
 // }
-    // int sockfdClientToServer, sockfdServerToClient;
-    // struct sockaddr_in addrClientToServer, addrServerToClient, addrServer, addrClient;
 
-    // // Create sockets for the router
-    // sockfdClientToServer = socket(AF_INET, SOCK_STREAM, 0);
-    // sockfdServerToClient = socket(AF_INET, SOCK_STREAM, 0);
+int main() {
 
-    // if (sockfdClientToServer < 0 || sockfdServerToClient < 0) {
-    //     perror("Socket creation failed");
-    //     return 1;
-    // }
+    int sockfdClientToServer, sockfdServerToClient;
+    struct sockaddr_in addrClientToServer, addrServerToClient, addrServer, addrClient;
 
-    // // Set up the client to server forwarding
-    // memset(&addrClientToServer, 0, sizeof(addrClientToServer));
-    // addrClientToServer.sin_family = AF_INET;
-    // addrClientToServer.sin_addr.s_addr = htonl(INADDR_ANY);
-    // addrClientToServer.sin_port = htons(ROUTER_PORT_CLIENT_TO_SERVER);
+    // Create sockets for the router
+    sockfdClientToServer = socket(AF_INET, SOCK_STREAM, 0);
+    sockfdServerToClient = socket(AF_INET, SOCK_STREAM, 0);
 
-    // if (bind(sockfdClientToServer, (struct sockaddr *)&addrClientToServer, sizeof(addrClientToServer)) < 0) {
-    //     perror("Bind failed for client to server socket");
-    //     return 1;
-    // }
+    if (sockfdClientToServer < 0 || sockfdServerToClient < 0) {
+        perror("Socket creation failed");
+        return 1;
+    }
 
-    // // Set up the server to client forwarding
-    // memset(&addrServerToClient, 0, sizeof(addrServerToClient));
-    // addrServerToClient.sin_family = AF_INET;
-    // addrServerToClient.sin_addr.s_addr = htonl(INADDR_ANY);
-    // addrServerToClient.sin_port = htons(ROUTER_PORT_SERVER_TO_CLIENT);
+    // Set up the client to server forwarding
+    memset(&addrClientToServer, 0, sizeof(addrClientToServer));
+    addrClientToServer.sin_family = AF_INET;
+    addrClientToServer.sin_addr.s_addr = htonl(INADDR_ANY);
+    addrClientToServer.sin_port = htons(ROUTER_PORT_CLIENT_TO_SERVER);
 
-    // if (bind(sockfdServerToClient, (struct sockaddr *)&addrServerToClient, sizeof(addrServerToClient)) < 0) {
-    //     perror("Bind failed for server to client socket");
-    //     return 1;
-    // }
+    if (bind(sockfdClientToServer, (struct sockaddr *)&addrClientToServer, sizeof(addrClientToServer)) < 0) {
+        perror("Bind failed for client to server socket");
+        return 1;
+    }
 
-    // // Define the server and client addresses to forward the packets
-    // memset(&addrServer, 0, sizeof(addrServer));
-    // addrServer.sin_family = AF_INET;
-    // addrServer.sin_port = htons(SERVER_PORT);
-    // inet_pton(AF_INET, SERVER_IP, &addrServer.sin_addr);
+    // Set up the server to client forwarding
+    memset(&addrServerToClient, 0, sizeof(addrServerToClient));
+    addrServerToClient.sin_family = AF_INET;
+    addrServerToClient.sin_addr.s_addr = htonl(INADDR_ANY);
+    addrServerToClient.sin_port = htons(ROUTER_PORT_SERVER_TO_CLIENT);
 
-    // memset(&addrClient, 0, sizeof(addrClient));
-    // addrClient.sin_family = AF_INET;
-    // addrClient.sin_port = htons(CLIENT_PORT);
-    // inet_pton(AF_INET, CLIENT_IP, &addrClient.sin_addr);
+    if (bind(sockfdServerToClient, (struct sockaddr *)&addrServerToClient, sizeof(addrServerToClient)) < 0) {
+        perror("Bind failed for server to client socket");
+        return 1;
+    }
 
-    // // Start a child process or thread to handle Client to Server traffic
-    // pid_t pid = fork();
-    // if (pid == 0) {
-    //     // Child process: handle client to server traffic
-    //     cout << "handling c to s" << endl;
-    //     handleTraffic(sockfdClientToServer, addrClientToServer, sockfdServerToClient, addrServer);
-    //     close(sockfdClientToServer);
-    //     close(sockfdServerToClient);
-    //     return 0;
-    // } else {
-    //     // Parent process: handle server to client traffic
-    //     cout << "handling s to c" << endl;
-    //     handleTraffic(sockfdServerToClient, addrServerToClient, sockfdClientToServer, addrClient);
-    //     close(sockfdClientToServer);
-    //     close(sockfdServerToClient);
-    //     return 0;
-    // }
+    // Define the server and client addresses to forward the packets
+    memset(&addrServer, 0, sizeof(addrServer));
+    addrServer.sin_family = AF_INET;
+    addrServer.sin_port = htons(SERVER_PORT);
+    inet_pton(AF_INET, SERVER_IP, &addrServer.sin_addr);
 
+    memset(&addrClient, 0, sizeof(addrClient));
+    addrClient.sin_family = AF_INET;
+    addrClient.sin_port = htons(CLIENT_PORT);
+    inet_pton(AF_INET, CLIENT_IP, &addrClient.sin_addr);
+
+    // Start a child process or thread to handle Client to Server traffic
+    pid_t pid = fork();
+    if (pid == 0) {
+        // Child process: handle client to server traffic
+        cout << "handling c to s" << endl;
+        handleTraffic(sockfdClientToServer, addrClientToServer, sockfdServerToClient, addrServer);
+        close(sockfdClientToServer);
+        close(sockfdServerToClient);
+        return 0;
+    } else {
+        // Parent process: handle server to client traffic
+        cout << "handling s to c" << endl;
+        handleTraffic(sockfdServerToClient, addrServerToClient, sockfdClientToServer, addrClient);
+        close(sockfdClientToServer);
+        close(sockfdServerToClient);
+        return 0;
+    }
+}
 
 
 

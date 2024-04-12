@@ -25,9 +25,9 @@ using namespace std;
 
 #define CLIENT_IP "127.0.0.1"
 #define SERVER_IP "127.0.0.2"
-#define SERVER_PORT 9000
-#define ROUTER_PORT 9002
-#define CLIENT_PORT 9003
+#define SERVER_PORT 9002
+// #define ROUTER_PORT 9004
+// #define CLIENT_PORT 9003
 
 #define SA struct sockaddr
 
@@ -204,35 +204,35 @@ int tcpsocket(){
     return 0;
 }
 
-int udpsocket()
-{
-	cout << "start udp" << endl;
+// int udpsocket()
+// {
+// 	cout << "start udp" << endl;
 
-    int server_fd;
-    struct sockaddr_in ser_addr;
+//     int server_fd;
+//     struct sockaddr_in ser_addr;
 
-    server_fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if(server_fd < 0)
-    {
-        printf("create socket fail!\n");
-        return -1;
-    }
-    else{
-        cout << "udp created" << endl;
-    }
+//     server_fd = socket(AF_INET, SOCK_DGRAM, 0);
+//     if(server_fd < 0)
+//     {
+//         printf("create socket fail!\n");
+//         return -1;
+//     }
+//     else{
+//         cout << "udp created" << endl;
+//     }
 
 
-    memset(&ser_addr, 0, sizeof(ser_addr));
-    ser_addr.sin_family = AF_INET;
-    ser_addr.sin_addr.s_addr = inet_addr(CLIENT_IP);
-    ser_addr.sin_port = htons(ROUTER_PORT);
+//     memset(&ser_addr, 0, sizeof(ser_addr));
+//     ser_addr.sin_family = AF_INET;
+//     ser_addr.sin_addr.s_addr = inet_addr(CLIENT_IP);
+//     ser_addr.sin_port = htons(ROUTER_PORT);
 
-    udp_msg_sender(server_fd, (struct sockaddr*)&ser_addr);
+//     udp_msg_sender(server_fd, (struct sockaddr*)&ser_addr);
     
-    close(server_fd);
+//     close(server_fd);
 
-    return 0;
-}
+//     return 0;
+// }
 
 int main()
 {

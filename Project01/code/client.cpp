@@ -25,8 +25,8 @@ using namespace std;
 
 #define CLIENT_IP "127.0.0.1"
 #define SERVER_IP "127.0.0.2"
-#define SERVER_PORT 9000
-#define ROUTER_PORT 9002
+// #define SERVER_PORT 9000
+#define ROUTER_PORT_TCP 9005
 #define CLIENT_PORT 9003
 
 #define SA struct sockaddr
@@ -225,16 +225,16 @@ int tcpsocket()
     	}
 
     	serv_addr.sin_family = AF_INET;           //ipv4   
-    	serv_addr.sin_port = htons(ROUTER_PORT);  //port number 
+    	serv_addr.sin_port = htons(ROUTER_PORT_TCP);  //port number 
 
     
     	if(inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) <= 0) { //  IP address轉換為二進制形式(127.0.0.1) localhost
         	perror("Invalid address/ Address not supported");
         	exit(EXIT_FAILURE);
     	}
-        cout << "No problem currently" << endl;
-        cout << "server_fd" << server_fd << endl;
-        cout << "sizeof(serv_addr)" << sizeof(serv_addr) << endl;
+        // cout << "No problem currently" << endl;
+        // cout << "server_fd" << server_fd << endl;
+        // cout << "sizeof(serv_addr)" << sizeof(serv_addr) << endl;
         
 
     	// Connected to server
