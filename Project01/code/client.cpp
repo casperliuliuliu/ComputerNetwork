@@ -75,7 +75,7 @@ typedef struct TCPHeader {
 typedef struct Packet  
 {
   struct IPHeader ipheader;
-  struct UDPHeader udpheader;
+  struct UDPHeader udpheader; 
   struct MACHeader macheader;
   char buffer[MTU - 46];
 }Packet;  //UDP Packet

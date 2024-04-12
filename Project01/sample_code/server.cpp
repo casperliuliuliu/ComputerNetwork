@@ -16,6 +16,19 @@ int port = 9002;
 
 const char* send_host = "127.0.0.2";
 int send_port = 9003;
+int sock_fd, new_fd;
+
+socklen_t addrlen;
+struct sockaddr_in my_addr, client_addr;
+int status;
+int on = 1;
+
+char indata[1024] = {0}, outdata[1024] = {0};
+char udp_indata[1024] = {0}, udp_outdata[1024] = {0};
+
+int udp_sock_fd;
+struct sockaddr_in serv_name;
+int udp_status;
 
 void tcp_recv(){
 
@@ -48,10 +61,10 @@ void tcp_recv(){
 
 void udp_send(){
 
-    outdata[0] = 'a';
-    outdata[1] = 'b';
-    outdata[2] = 'c';
-    outdata[3] = 'd';
+    udp_outdata[0] = 'a';
+    udp_outdata[1] = 'b';
+    udp_outdata[2] = 'c';
+    udp_outdata[3] = 'd';
 
     int payload_size = 1500;
     char buf[payload_size];
@@ -62,43 +75,32 @@ void udp_send(){
     
     for( int ii =0; ii<5 ; ii++) {
         sleep(1);
-        outdata[0] ++;
-        outdata[1] ++;
-        outdata[2] ++;
-        outdata[3] ++;
+        udp_outdata[0] ++;
+        udp_outdata[1] ++;
+        udp_outdata[2] ++;
+        udp_outdata[3] ++;
         // Remove newline character if fgets reads it from stdin
-        outdata[strcspn(outdata, "\n")] = '\0';
+        udp_outdata[strcspn(udp_outdata, "\n")] = '\0';
 
-        printf("Send: %s\n", outdata);
-        send(sock_fd, outdata, strlen(outdata), 0);
+        printf("Send: %s\n", udp_outdata);
+        send(udp_sock_fd, udp_outdata, strlen(udp_outdata), 0);
 
-        int nbytes = recv(sock_fd, indata, sizeof(indata) - 1, 0);
+        int nbytes = recv(udp_sock_fd, udp_indata, sizeof(udp_indata) - 1, 0);
         if (nbytes <= 0) {
-            close(sock_fd);
+            close(udp_sock_fd);
             printf("client closed connection.\n");
             break;
         }
 
         // Ensure buffer is null-terminated to safely use it as a C string
-        indata[nbytes] = '\0';
+        udp_indata[nbytes] = '\0';
         // printf("Recv: %s\n", indata);
     }
 }
 
-int sock_fd, new_fd;
-socklen_t addrlen;
-struct sockaddr_in my_addr, client_addr;
-int status;
-int on = 1;
 
-char indata[1024] = {0}, outdata[1024] = {0};
-int udp_sock_fd;
-struct sockaddr_in serv_name;
-int udp_status;
 int main()
 {
-
-
     // create a socket
     sock_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (sock_fd == -1) {
@@ -133,7 +135,10 @@ int main()
 
 
 
-    sleep(3);
+
+
+
+    sleep(10);
 
 
 
@@ -156,7 +161,17 @@ int main()
     }
 
 
-    tcp_recv();
-    udp_send();
+    pid_t pid = fork();
+    if (pid == 0) { // Child process
+        tcp_recv();
+        return 0;
+    } else if (pid > 0) { // Parent process
+        udp_send();
+        return 0;
+    } else {
+        perror("Failed to fork");
+        return 1;
+    }
+
     return 0;
 }
