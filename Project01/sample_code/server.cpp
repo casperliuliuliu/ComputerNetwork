@@ -11,8 +11,7 @@
 using namespace std;
 
 const char* host = "127.0.0.2";
-int port = 9002;
-
+int port = 9009;
 
 const char* send_host = "127.0.0.2";
 int send_port = 9003;
@@ -55,7 +54,7 @@ void tcp_recv(){
         if (count > 4) break;
 
     }
-    close(sock_fd);
+    // close(sock_fd);
 
 }
 
@@ -95,6 +94,7 @@ void udp_send(){
         // Ensure buffer is null-terminated to safely use it as a C string
         udp_indata[nbytes] = '\0';
         // printf("Recv: %s\n", indata);
+        close(udp_sock_fd);
     }
 }
 
@@ -138,7 +138,7 @@ int main()
 
 
 
-    sleep(10);
+    sleep(5);
 
 
 
@@ -160,8 +160,10 @@ int main()
         exit(1);
     }
 
+    sleep(5);
 
-    pid_t pid = fork();
+    // pid_t pid = fork();
+    int pid = 1;
     if (pid == 0) { // Child process
         tcp_recv();
         return 0;

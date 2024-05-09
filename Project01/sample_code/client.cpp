@@ -57,6 +57,7 @@ void tcp_send(){
         // Ensure buffer is null-terminated to safely use it as a C string
         indata[nbytes] = '\0';
         // printf("Recv: %s\n", indata);
+        close(sock_fd);
     }
 }
 void udp_recv(){
@@ -83,7 +84,7 @@ void udp_recv(){
         if (count > 4) break;
 
     }
-    close(udp_sock_fd);
+    // close(udp_sock_fd);
 
 }
 int main()
@@ -139,10 +140,12 @@ int main()
     }
     printf("wait for connection...\n");
 
+    sleep(10);
 
 
 
-    pid_t pid = fork();
+    // pid_t pid = fork();
+    int pid = 1;
     if (pid == 0) { // Child process
         // cout << "handling c to s" << endl;
         tcp_send();
