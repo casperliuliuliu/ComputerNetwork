@@ -89,7 +89,7 @@ void tcp_recv(){
 
             // cout << "Received data: " << data << endl;
             cout << "Timestamp: " << ctime(&start_time);
-            cout << "# " << count+1 << " Packet delay: " << elapsed_seconds.count() << "s" << endl;
+            cout << "# " << count+1 << " Packet delay: " << elapsed_seconds.count()*1000 << " ms" << endl;
             cout << "Throughput: " << (sizeof(data) + 20) * 8 / elapsed_seconds.count() / 1000000 << "Mbps" << endl;
             cout << "===================" << endl;
 

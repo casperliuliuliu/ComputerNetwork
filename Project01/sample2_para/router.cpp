@@ -114,7 +114,7 @@ void tcp_client_to_server(){
             this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
             history_time = this_time;
             cout << "handling c to s" << endl;
-            cout << "TCP AVG Packet queuing time: " << this_time << "s" << endl;
+            cout << "TCP AVG Packet queuing time: " << this_time * 1000 << " ms" << endl;
             cout << "===================" << endl;
 
             send(server_sock_fd, outdata, strlen(outdata), 0);
@@ -171,7 +171,7 @@ void udp_server_to_client(){
             this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
             history_time = this_time;
             cout << "handling s to c" << endl;
-            cout << "UDP AVG Packet queuing time: " << this_time << "s" << endl;
+            cout << "UDP AVG Packet queuing time: " << this_time * 1000 << " ms" << endl;
             cout << "===================" << endl;
             send(udp_server_sock_fd, udp_outdata, strlen(udp_outdata), 0);
 
