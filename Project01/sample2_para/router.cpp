@@ -16,7 +16,7 @@ const char* host = "127.0.0.1";
 int port = 9090;
 
 const char* out_host = "127.0.0.2";
-int out_port = 9012;
+int out_port = 9014;
 
 const char* udp_client_host = "127.0.0.1";
 int udp_client_port = 9004;
@@ -82,6 +82,7 @@ void tcp_client_to_server(){
     chrono::duration<double> elapsed_seconds;
     double history_time;
     double this_time;
+    clock_t another_start, another_end;
     while (1) {
         new_fd = accept(sock_fd, (struct sockaddr *)&client_addr, &addrlen);
         printf("connected by %s:%d\n", inet_ntoa(client_addr.sin_addr),
@@ -95,7 +96,9 @@ void tcp_client_to_server(){
                 printf("client closed connection.\n");
                 break;
             }
-            router_start_time_point = chrono::system_clock::now();
+            // router_start_time_point = chrono::system_clock::now();
+            // router_start_time_point = chrono::steady_clock::now();
+            another_start = clock();
             memcpy(&tcpHeader, indata, sizeof(TCPHeader));
             data = indata + sizeof(TCPHeader);
             start_time_point = tcpHeader.start;
@@ -108,13 +111,23 @@ void tcp_client_to_server(){
             this_thread::sleep_for(chrono::milliseconds(1500));
             // printf("Send: %s\n", outdata);
 
-            router_end_time_point = chrono::system_clock::now();
+            // router_end_time_point = chrono::system_clock::now();
+            // router_end_time_point = chrono::steady_clock::now();
+            another_end = clock();
             elapsed_seconds = router_end_time_point - router_start_time_point;
 
-            this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
+            // this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
+            // this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
+
+            // if (count == 1){
+            //     cout << "TCP AVG Packet queuing time: " << double(another_end - another_start) / double(CLOCKS_PER_SEC) << " sec ";
+            //     // this_time = elapsed_seconds.count();
+            // }
+
             history_time = this_time;
             cout << "handling c to s" << endl;
-            cout << "TCP AVG Packet queuing time: " << this_time * 1000 << " ms" << endl;
+            // cout << "TCP AVG Packet queuing time: " << this_time * 1000 << " ms" << endl;
+            cout << "TCP AVG Packet queuing time: " << double(another_end - another_start) * 1000 / double(CLOCKS_PER_SEC) << " sec ";
             cout << "===================" << endl;
 
             send(server_sock_fd, outdata, strlen(outdata), 0);
@@ -169,6 +182,10 @@ void udp_server_to_client(){
             router_end_time_point = chrono::system_clock::now();
             elapsed_seconds = router_end_time_point - router_start_time_point;
             this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
+            if (count == 0){
+                cout << "hello";
+                this_time = elapsed_seconds.count();
+            }
             history_time = this_time;
             cout << "handling s to c" << endl;
             cout << "UDP AVG Packet queuing time: " << this_time * 1000 << " ms" << endl;
