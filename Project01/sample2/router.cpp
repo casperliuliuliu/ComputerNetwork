@@ -152,7 +152,10 @@ void tcp_client_to_server(){
             router_end_time_point = chrono::system_clock::now();
             elapsed_seconds = router_end_time_point - router_start_time_point;
 
-            this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
+            if (count != 1)
+                this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
+            else
+                this_time = elapsed_seconds.count();
             history_time = this_time;
             cout << "AVG Packet queuing time: " << this_time << "s" << endl;
 
@@ -266,7 +269,10 @@ void udp_server_to_client(){
             // cout << "Timestamp: " << ctime(&start_time);
             router_end_time_point = chrono::system_clock::now();
             elapsed_seconds = router_end_time_point - router_start_time_point;
-            this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
+            if (count != 1)
+                this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
+            else
+                this_time = elapsed_seconds.count();
             history_time = this_time;
             cout << "AVG Packet queuing time: " << this_time << "s" << endl;
             send(server_sock_fd, outdata, strlen(outdata), 0);

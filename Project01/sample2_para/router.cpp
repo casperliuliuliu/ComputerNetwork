@@ -96,9 +96,7 @@ void tcp_client_to_server(){
                 printf("client closed connection.\n");
                 break;
             }
-            // router_start_time_point = chrono::system_clock::now();
-            // router_start_time_point = chrono::steady_clock::now();
-            another_start = clock();
+            router_start_time_point = chrono::system_clock::now();
             memcpy(&tcpHeader, indata, sizeof(TCPHeader));
             data = indata + sizeof(TCPHeader);
             start_time_point = tcpHeader.start;
@@ -111,26 +109,20 @@ void tcp_client_to_server(){
             this_thread::sleep_for(chrono::milliseconds(1500));
             // printf("Send: %s\n", outdata);
 
-            // router_end_time_point = chrono::system_clock::now();
-            // router_end_time_point = chrono::steady_clock::now();
-            another_end = clock();
+            router_end_time_point = chrono::system_clock::now();
             elapsed_seconds = router_end_time_point - router_start_time_point;
 
-            // this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
-            // this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
-
-            // if (count == 1){
-            //     cout << "TCP AVG Packet queuing time: " << double(another_end - another_start) / double(CLOCKS_PER_SEC) << " sec ";
-            //     // this_time = elapsed_seconds.count();
-            // }
-
+            if (count != 1)
+                this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
+            else
+                this_time = elapsed_seconds.count();
             history_time = this_time;
-            cout << "handling c to s" << endl;
-            // cout << "TCP AVG Packet queuing time: " << this_time * 1000 << " ms" << endl;
-            cout << "TCP AVG Packet queuing time: " << double(another_end - another_start) * 1000 / double(CLOCKS_PER_SEC) << " sec ";
-            cout << "===================" << endl;
+            cout << "Client -> Server" << endl;
+            cout << "AVG TCP Packet queuing time: " << this_time << "s" << endl;
+            cout << "=======================" << endl;
 
             send(server_sock_fd, outdata, strlen(outdata), 0);
+
 
             if (count > 4) break;
         }
@@ -140,8 +132,7 @@ void tcp_client_to_server(){
     close(sock_fd);
     close(server_sock_fd);
 }
-
-void udp_server_to_client(){
+void udp_server_to_client_old(){
     
 
     udp_addrlen = sizeof(udp_client_addr);
@@ -200,6 +191,65 @@ void udp_server_to_client(){
     }
     close(sock_fd);
     close(server_sock_fd);
+}
+
+void udp_server_to_client(){
+    
+
+    udp_addrlen = sizeof(udp_client_addr);
+    int count = 0;
+    struct UDPHeader udpHeader;
+    chrono::time_point<chrono::system_clock> start_time_point;
+    time_t start_time;
+    chrono::time_point<chrono::system_clock> router_start_time_point;
+    chrono::time_point<chrono::system_clock> router_end_time_point;
+    chrono::duration<double> elapsed_seconds;
+    char* data;
+    double history_time = 0;
+    double this_time = 0;
+    while (1) {
+        udp_new_fd = accept(udp_sock_fd, (struct sockaddr *)&udp_client_addr, &udp_addrlen);
+        printf("connected by %s:%d\n", inet_ntoa(udp_client_addr.sin_addr),
+            ntohs(udp_client_addr.sin_port));
+
+        while (1) {
+            int nbytes = recv(udp_new_fd, udp_indata, sizeof(udp_indata), 0);
+            if (nbytes <= 0) {
+                close(udp_new_fd);
+                printf("client closed connection.\n");
+                break;
+            }
+            router_start_time_point = chrono::system_clock::now();
+            memcpy(&udpHeader, udp_indata, sizeof(UDPHeader));
+            data = indata + sizeof(UDPHeader);
+            start_time_point = udpHeader.start;
+            start_time = chrono::system_clock::to_time_t(start_time_point);
+            // cout << "Received data: " << data << endl;
+            count++;
+            sprintf(udp_outdata, "%s", udp_indata);
+            this_thread::sleep_for(chrono::milliseconds(500));
+            // printf("\nSend: %s\n", outdata);
+            // cout << "Timestamp: " << ctime(&start_time);
+            router_end_time_point = chrono::system_clock::now();
+            elapsed_seconds = router_end_time_point - router_start_time_point;
+            if (count != 1)
+                this_time = elapsed_seconds.count() * 0.3 + history_time * 0.7;
+            else
+                this_time = elapsed_seconds.count();
+            history_time = this_time;
+            cout << "Server -> Client" << endl;
+            cout << "AVG UDP Packet queuing time: " << this_time << "s" << endl;
+            cout << "=======================" << endl;
+            send(udp_server_sock_fd, udp_outdata, strlen(udp_outdata), 0);
+
+            if (count > 4) break;
+
+        }
+        if (count > 4) break;
+
+    }
+    close(udp_sock_fd);
+    close(udp_server_sock_fd);
 }
 
 
